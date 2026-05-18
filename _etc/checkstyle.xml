@@ -7,38 +7,42 @@
 
     <property name="charset" value="UTF-8"/>
 
-    <!-- Optional suppression file -->
+    <!-- ========================================================= -->
+    <!-- SUPPRESSIONS                                              -->
+    <!-- ========================================================= -->
+
     <module name="SuppressionFilter">
         <property name="file" value="${checkstyle.suppressions.file}"/>
         <property name="optional" value="true"/>
     </module>
 
+
     <!-- ========================================================= -->
-    <!-- HARD FAILURES: obvious logging anti-patterns               -->
+    <!-- LOGGING: HARD FAILURES                                    -->
     <!-- ========================================================= -->
 
-    <!-- No System.out.println / System.err.println -->
+    <!-- Do not use System.out/System.err for application logging -->
     <module name="RegexpSingleline">
         <property name="format" value="System\.(out|err)\.print"/>
         <property name="message" value="Use the project logger instead of System.out/System.err"/>
         <property name="severity" value="error"/>
     </module>
 
-    <!-- No exception.printStackTrace() -->
+    <!-- Do not use exception.printStackTrace() -->
     <module name="RegexpSingleline">
         <property name="format" value="\.printStackTrace\s*\("/>
         <property name="message" value="Use logger with exception argument instead of printStackTrace()"/>
         <property name="severity" value="error"/>
     </module>
 
-    <!-- Avoid java.util.logging if project uses SLF4J -->
+    <!-- Avoid java.util.logging if the project standard is SLF4J/Logback -->
     <module name="RegexpSingleline">
         <property name="format" value="import\s+java\.util\.logging\."/>
         <property name="message" value="Use SLF4J/project logger instead of java.util.logging"/>
         <property name="severity" value="error"/>
     </module>
 
-    <!-- Avoid Apache Commons Logging if project uses SLF4J -->
+    <!-- Avoid Apache Commons Logging if the project standard is SLF4J/Logback -->
     <module name="RegexpSingleline">
         <property name="format" value="import\s+org\.apache\.commons\.logging\."/>
         <property name="message" value="Use SLF4J/project logger instead of Apache Commons Logging"/>
@@ -47,28 +51,74 @@
 
 
     <!-- ========================================================= -->
-    <!-- WARNINGS: useful review candidates, not always wrong       -->
+    <!-- LOGGING: REVIEW WARNINGS                                  -->
+    <!-- These are useful candidates, but not always strictly wrong -->
     <!-- ========================================================= -->
 
     <!-- Prefer parameterized logging over string concatenation -->
     <module name="RegexpSingleline">
-        <property name="format" value="\b(log|logger|LOGGER)\.(trace|debug|info|warn|error)\s*\([^;]*\+[^;]*\);"/>
+        <property name="format" value="\b(log|logger|LOGGER|LOG)\.(trace|debug|info|warn|error)\s*\([^;]*\+[^;]*\);"/>
         <property name="message" value="Prefer parameterized logging instead of string concatenation"/>
         <property name="severity" value="warning"/>
     </module>
 
-    <!-- Logging only exception.getMessage() often loses stack trace -->
+    <!-- Logging e.getMessage() often loses stack trace/context -->
     <module name="RegexpSingleline">
-        <property name="format" value="\b(log|logger|LOGGER)\.(warn|error)\s*\([^;]*\.getMessage\s*\(\s*\)[^;]*\);"/>
-        <property name="message" value="Review this log statement: logging exception.getMessage() may lose stack trace/context"/>
+        <property name="format"
+                  value="\b(log|logger|LOGGER|LOG)\.(warn|error)\s*\([^;]*\.getMessage\s*\(\s*\)[^;]*\);"/>
+        <property name="message"
+                  value="Review this log statement: logging exception.getMessage() may lose stack trace/context"/>
         <property name="severity" value="warning"/>
     </module>
 
     <!-- Logging exception.toString() usually loses stack trace -->
     <module name="RegexpSingleline">
-        <property name="format" value="\b(log|logger|LOGGER)\.(warn|error)\s*\([^;]*\.toString\s*\(\s*\)[^;]*\);"/>
-        <property name="message" value="Review this log statement: logging exception.toString() may lose stack trace/context"/>
+        <property name="format" value="\b(log|logger|LOGGER|LOG)\.(warn|error)\s*\([^;]*\.toString\s*\(\s*\)[^;]*\);"/>
+        <property name="message"
+                  value="Review this log statement: logging exception.toString() may lose stack trace/context"/>
         <property name="severity" value="warning"/>
+    </module>
+
+    <!-- Warn on log.error(...) with no exception argument.
+         This is intentionally only a warning because not every error log needs an exception. -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\b(log|logger|LOGGER|LOG)\.error\s*\(&quot;[^&quot;]*&quot;\s*\);"/>
+        <property name="message"
+                  value="Review this error log: consider whether an exception/context argument should be included"/>
+        <property name="severity" value="warning"/>
+    </module>
+
+
+    <!-- ========================================================= -->
+    <!-- ERROR HANDLING                                            -->
+    <!-- ========================================================= -->
+
+    <module name="TreeWalker">
+
+        <!-- Catching Throwable/Error is almost never correct in normal application code -->
+        <module name="IllegalCatch">
+            <property name="illegalClassNames"
+                      value="Throwable, Error, java.lang.Throwable, java.lang.Error"/>
+            <property name="severity" value="error"/>
+        </module>
+
+        <!-- Empty catch blocks usually hide failures.
+             A catch block with comments or actual handling is not treated the same as a totally empty block. -->
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+            <property name="tokens" value="LITERAL_CATCH,LITERAL_FINALLY"/>
+            <property name="severity" value="error"/>
+        </module>
+
+        <!-- Avoid declaring very broad throwable types in method signatures.
+             Warning only, because overridden framework/API methods may force this. -->
+        <module name="IllegalThrows">
+            <property name="illegalClassNames"
+                      value="Throwable, Error, RuntimeException, java.lang.Throwable, java.lang.Error, java.lang.RuntimeException"/>
+            <property name="ignoreOverriddenMethods" value="true"/>
+            <property name="severity" value="warning"/>
+        </module>
+
     </module>
 
 </module>
