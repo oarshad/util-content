@@ -7,52 +7,68 @@
 
     <property name="charset" value="UTF-8"/>
 
-    <!-- Allows suppression file -->
+    <!-- Optional suppression file -->
     <module name="SuppressionFilter">
         <property name="file" value="${checkstyle.suppressions.file}"/>
         <property name="optional" value="true"/>
     </module>
 
-    <!-- Block System.out / System.err -->
+    <!-- ========================================================= -->
+    <!-- HARD FAILURES: obvious logging anti-patterns               -->
+    <!-- ========================================================= -->
+
+    <!-- No System.out.println / System.err.println -->
     <module name="RegexpSingleline">
         <property name="format" value="System\.(out|err)\.print"/>
         <property name="message" value="Use the project logger instead of System.out/System.err"/>
-        <property name="ignoreComments" value="true"/>
+        <property name="severity" value="error"/>
     </module>
 
-    <!-- Block printStackTrace -->
+    <!-- No exception.printStackTrace() -->
     <module name="RegexpSingleline">
         <property name="format" value="\.printStackTrace\s*\("/>
         <property name="message" value="Use logger with exception argument instead of printStackTrace()"/>
-        <property name="ignoreComments" value="true"/>
+        <property name="severity" value="error"/>
     </module>
 
-    <!-- Block java.util.logging if you use SLF4J/Logback -->
+    <!-- Avoid java.util.logging if project uses SLF4J -->
     <module name="RegexpSingleline">
         <property name="format" value="import\s+java\.util\.logging\."/>
         <property name="message" value="Use SLF4J/project logger instead of java.util.logging"/>
-        <property name="ignoreComments" value="true"/>
+        <property name="severity" value="error"/>
     </module>
 
-    <module name="TreeWalker">
-
-        <!-- Prevent catch(Throwable t) -->
-        <module name="IllegalCatch">
-            <property name="illegalClassNames" value="Throwable"/>
-        </module>
-
-        <!-- You can enable this later if you want to ban catch(Exception) too -->
-        <!--
-        <module name="IllegalCatch">
-            <property name="illegalClassNames" value="Exception, RuntimeException, Throwable"/>
-        </module>
-        -->
-
-        <!-- Empty catch/finally/etc. blocks -->
-        <module name="EmptyBlock">
-            <property name="option" value="text"/>
-            <property name="tokens" value="LITERAL_CATCH,LITERAL_FINALLY,LITERAL_IF,LITERAL_ELSE,LITERAL_TRY"/>
-        </module>
-
+    <!-- Avoid Apache Commons Logging if project uses SLF4J -->
+    <module name="RegexpSingleline">
+        <property name="format" value="import\s+org\.apache\.commons\.logging\."/>
+        <property name="message" value="Use SLF4J/project logger instead of Apache Commons Logging"/>
+        <property name="severity" value="error"/>
     </module>
+
+
+    <!-- ========================================================= -->
+    <!-- WARNINGS: useful review candidates, not always wrong       -->
+    <!-- ========================================================= -->
+
+    <!-- Prefer parameterized logging over string concatenation -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\b(log|logger|LOGGER)\.(trace|debug|info|warn|error)\s*\([^;]*\+[^;]*\);"/>
+        <property name="message" value="Prefer parameterized logging instead of string concatenation"/>
+        <property name="severity" value="warning"/>
+    </module>
+
+    <!-- Logging only exception.getMessage() often loses stack trace -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\b(log|logger|LOGGER)\.(warn|error)\s*\([^;]*\.getMessage\s*\(\s*\)[^;]*\);"/>
+        <property name="message" value="Review this log statement: logging exception.getMessage() may lose stack trace/context"/>
+        <property name="severity" value="warning"/>
+    </module>
+
+    <!-- Logging exception.toString() usually loses stack trace -->
+    <module name="RegexpSingleline">
+        <property name="format" value="\b(log|logger|LOGGER)\.(warn|error)\s*\([^;]*\.toString\s*\(\s*\)[^;]*\);"/>
+        <property name="message" value="Review this log statement: logging exception.toString() may lose stack trace/context"/>
+        <property name="severity" value="warning"/>
+    </module>
+
 </module>
