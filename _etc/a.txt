@@ -1,4 +1,1 @@
-https://claude.ai/oauth/authorize?code=true&client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A34441%2Fcallback&scope=org%3Acreate_api_key+user%3Aprofile+user%3Ainference+user%3Asessions%3Aclaude_code+user%3Amcp_servers+user%3Afile_upload&code_challenge=4wodYAWfSlIPrvF5jXQqoDnZ_pQ5MmlTMiK0JW8z9s4&code_challenge_method=S256&state=2WXzSH8LuP2s3SEIkSQM24vY8aqG_6wFLa4Y5hIdB3U
 
-
-https://claude.ai/magic-link#a22dc8e174553863a7c899b69e629e8a:b2Fyc2hhZDE5ODBAZ21haWwuY29t
